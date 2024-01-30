@@ -1,26 +1,18 @@
 import { Logger, createLogger, format, transports } from 'winston'
 import sensitive from '../utils/sensitive.js'
 import ignoreCase from '../utils/ignore.js'
+import { makeStructuredClone } from '../utils/index.js'
 
 let level = process.env.LOG_LEVEL || 'debug'
 if (process.env.NODE_ENV === 'production') {
   level = 'info'
 }
 
-const myFormat = format.printf(({ level, message, timestamp, ...metadata }) => {
-  let msg = `${timestamp} [${level}] : ${message} `
-  if (metadata) {
-    msg += JSON.stringify(metadata)
-  }
-  return msg
-})
-
 function NewLogger(serviceName: string): Logger {
   return createLogger({
     level: level,
     format: format.combine(
       format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss', alias: '@timestamp' }),
-      myFormat,
       format.json({
         replacer(key, value) {
           if (ignoreCase.equal(key, 'password')) {
@@ -55,53 +47,24 @@ interface ILogger {
   info(message: string, data?: {} | [], session?: string): void
   error(message: string, data?: {} | [], session?: string): void
   debug(message: string, data?: {} | [], session?: string): void
+  standard(message: string, ...meta: any[]): void
 }
 
 const logger: ILogger = {
   info: (message: string, data?: {} | [], session?: string) => {
-    const payload = structuredClone(data)
-    if (typeof payload === 'object') {
-      if (Array.isArray(payload)) {
-        for (const item of payload) {
-          if (typeof item === 'object') {
-            sensitive.masking(item)
-          }
-        }
-      } else {
-        sensitive.masking(payload)
-      }
-    }
-    log.info(message, { action: JSON.stringify(payload), session: session })
+    const action = makeStructuredClone(data)
+    log.info(message, { action, session: session })
   },
   error: (message: string, data?: {} | [], session?: string) => {
-    const payload = structuredClone(data)
-    if (typeof payload === 'object') {
-      if (Array.isArray(payload)) {
-        for (const item of payload) {
-          if (typeof item === 'object') {
-            sensitive.masking(item)
-          }
-        }
-      } else {
-        sensitive.masking(payload)
-      }
-    }
-    log.error(message, { action: JSON.stringify(payload), session: session })
+    const action = makeStructuredClone(data)
+    log.error(message, { action, session: session })
   },
   debug: (message: string, data?: {} | [], session?: string) => {
-    const payload = structuredClone(data)
-    if (typeof payload === 'object') {
-      if (Array.isArray(payload)) {
-        for (const item of payload) {
-          if (typeof item === 'object') {
-            sensitive.masking(item)
-          }
-        }
-      } else {
-        sensitive.masking(payload)
-      }
-    }
-    log.debug(message, { action: JSON.stringify(payload), session: session })
+    const action = makeStructuredClone(data)
+    log.debug(message, { action, session: session })
+  },
+  standard: (message: string, ...meta: any[]) => {
+    log.info(message, ...meta)
   }
 }
 
