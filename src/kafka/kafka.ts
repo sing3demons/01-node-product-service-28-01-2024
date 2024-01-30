@@ -27,10 +27,13 @@ export default class KafkaNode {
         retries: 10
       }
     })
-    
   }
 
-  static async startConsumer(topics: string[]) {
+  static async startConsumer() {
+    const topics = process.env.KAFKA_TOPICS?.split(',')
+    if (!topics) {
+      throw new Error('KAFKA_TOPICS is required')
+    }
     const { kafka } = new KafkaNode()
     kafka.logger().info('Connecting... ')
     const admin = kafka.admin()
@@ -80,7 +83,7 @@ export default class KafkaNode {
         }
       }
     }
-   
+
     await admin.disconnect()
 
     const groupId = process.env.KAFKA_GROUP_ID
@@ -93,11 +96,7 @@ export default class KafkaNode {
     consumer.run({ eachMessage: consumeEventMessage })
   }
 
-  static async sendMsg(
-    topic: string,
-    headers: Record<string, unknown>,
-    body: Record<string, unknown>
-  ) {
+  static async sendMsg(topic: string, headers: Record<string, unknown>, body: Record<string, unknown>) {
     const { kafka } = new KafkaNode()
     const producer = kafka.producer()
     await producer.connect()

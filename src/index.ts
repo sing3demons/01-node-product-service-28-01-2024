@@ -1,3 +1,7 @@
+import KafkaNode from './kafka/kafka.js'
 import Server from './server.js'
 
-Server.start()
+(function main() {
+  Server.start()
+  KafkaNode.startConsumer()
+})()
