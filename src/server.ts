@@ -1,6 +1,7 @@
 import express, { Application, Request, Response } from 'express'
 import logger from './logger/logger.js'
 import os from 'os'
+import KafkaNode from './kafka/kafka.js'
 
 class Server {
   static async start() {
@@ -17,8 +18,19 @@ class Server {
 
     app.use(express.json())
 
-    app.get('/', (req: Request, res: Response) => {
-      res.json('Hello, This is Price Service!')
+    app.get('/topics', async (req: Request, res: Response) => {
+      const topics = await KafkaNode.listTopics()
+      res.json(topics)
+    })
+
+    app.post('/topics', async (req: Request, res: Response) => {
+      const createTopic = await KafkaNode.createTopics(req.body.topics)
+      res.json({ createTopic })
+    })
+
+    app.delete('/topics/:topic', async (req: Request, res: Response) => {
+      const deleteTopic = await KafkaNode.deleteTopics(req.params.topic)
+      res.json({ message: `Topic ${req.params.topic} deleted with result ${deleteTopic}` })
     })
 
     app.get('/healthz', (req: Request, res: Response) => res.sendStatus(200))

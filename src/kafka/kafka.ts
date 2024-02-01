@@ -110,4 +110,40 @@ export default class KafkaNode {
     kafka.logger().info(`Send Successfully ${JSON.stringify(result)}`)
     await producer.disconnect()
   }
+
+  static async listTopics() {
+    const admin = new KafkaNode().kafka.admin()
+    await admin.connect()
+    const listTopics = await admin.listTopics()
+    await admin.disconnect()
+    return {
+      topics: listTopics,
+      groups: admin.listGroups()
+    }
+  }
+
+  static async createTopics(topic: string) {
+    const admin = new KafkaNode().kafka.admin()
+    await admin.connect()
+    const createTopic = await admin.createTopics({
+      topics: [
+        {
+          topic: topic,
+          numPartitions: 3, // Number of partitions
+          replicationFactor: 1 // Replication factor
+        }
+      ]
+    })
+    await admin.disconnect()
+    return createTopic
+  }
+
+  static async deleteTopics(topics: string) {
+    const admin = new KafkaNode().kafka.admin()
+    await admin.connect()
+    await admin.deleteTopics({
+      topics: topics.split(',')
+    })
+    await admin.disconnect()
+  }
 }
