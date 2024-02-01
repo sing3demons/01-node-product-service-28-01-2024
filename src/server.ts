@@ -6,7 +6,14 @@ class Server {
   static async start() {
     const app: Application = express()
     const port = process.env.PORT || 3000
-    const host = os.hostname()
+    const host = os.hostname(),
+      platform = os.platform(),
+      arch = os.arch(),
+      uptime = os.uptime(),
+      totalmem = os.totalmem(),
+      freemem = os.freemem(),
+      cpus = os.cpus(),
+      networkInterfaces = os.networkInterfaces()
 
     app.use(express.json())
 
@@ -16,7 +23,21 @@ class Server {
 
     app.get('/healthz', (req: Request, res: Response) => res.sendStatus(200))
 
-    const server = app.listen(port, () => logger.standard(`Server is running on port ${port}`, { host, port }))
+    const server = app.listen(port, () => {
+      logger.standard(`Server is running on port ${port}`, {
+        host,
+        port,
+        platform,
+        arch,
+        uptime,
+        totalmem,
+        freemem,
+        cpus: cpus.map((cpu) => cpu.model),
+        networkInterfaces: Object.keys(networkInterfaces).map((key) => ({
+          name: key
+        }))
+      })
+    })
     process.on('SIGTERM', () => {
       logger.info('SIGTERM signal received: closing HTTP server')
       server.close(() => process.exit(0))

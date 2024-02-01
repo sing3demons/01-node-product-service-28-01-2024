@@ -1,7 +1,10 @@
 import sensitive from './sensitive.js'
 
 function makeStructuredClone<T>(obj: T): T {
-  const payload = structuredClone(obj)
+  if (typeof obj === 'undefined') {
+    return obj
+  }
+  const payload = JSON.parse(JSON.stringify(obj)) // structuredClone(obj)
   if (typeof payload === 'object') {
     if (Array.isArray(payload)) {
       for (const item of payload) {
