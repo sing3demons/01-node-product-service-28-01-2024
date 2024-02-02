@@ -111,8 +111,8 @@ export default class KafkaNode {
     await producer.disconnect()
   }
 
-  static async listTopics() {
-    const admin = new KafkaNode().kafka.admin()
+  async listTopics() {
+    const admin = this.kafka.admin()
     await admin.connect()
     const listTopics = await admin.listTopics()
     await admin.disconnect()
@@ -122,24 +122,26 @@ export default class KafkaNode {
     }
   }
 
-  static async createTopics(topic: string) {
-    const admin = new KafkaNode().kafka.admin()
-    await admin.connect()
-    const createTopic = await admin.createTopics({
-      topics: [
-        {
-          topic: topic,
+  async createTopics(topics: string) {
+    try {
+      const admin = this.kafka.admin()
+      await admin.connect()
+      const createTopic = await admin.createTopics({
+        topics: topics.split(',').map((topic) => ({
+          topic,
           numPartitions: 3, // Number of partitions
           replicationFactor: 1 // Replication factor
-        }
-      ]
-    })
-    await admin.disconnect()
-    return createTopic
+        }))
+      })
+      await admin.disconnect()
+      return createTopic
+    } catch (error) {
+      throw error
+    }
   }
 
-  static async deleteTopics(topics: string) {
-    const admin = new KafkaNode().kafka.admin()
+  async deleteTopics(topics: string) {
+    const admin = this.kafka.admin()
     await admin.connect()
     await admin.deleteTopics({
       topics: topics.split(',')
