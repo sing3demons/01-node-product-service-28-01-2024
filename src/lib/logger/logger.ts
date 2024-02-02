@@ -1,14 +1,14 @@
-import { Logger, createLogger, format, transports } from 'winston'
+import { Logger as WinstonLog, createLogger, format, transports } from 'winston'
 import sensitive from '../utils/sensitive.js'
 import ignoreCase from '../utils/ignore.js'
 import { makeStructuredClone } from '../utils/index.js'
 
-let level = process.env.LOG_LEVEL || 'debug'
+let level = process.env.LOG_LEVEL ?? 'debug'
 if (process.env.NODE_ENV === 'production') {
   level = 'info'
 }
 
-function NewLogger(serviceName: string): Logger {
+function NewLogger(serviceName: string): WinstonLog {
   return createLogger({
     level: level,
     format: format.combine(
@@ -68,4 +68,27 @@ const logger: ILogger = {
   }
 }
 
-export default logger
+export { logger }
+class Logger {
+  static info(message: string, data?: {} | [], session?: string) {
+    const action = makeStructuredClone(data)
+    log.info(message, { action, session: session })
+  }
+
+  static error(message: string, data?: {} | [], session?: string) {
+    const action = makeStructuredClone(data)
+    log.error(message, { action, session: session })
+  }
+
+  static debug(message: string, data?: {} | [], session?: string) {
+    const action = makeStructuredClone(data)
+    log.debug(message, { action, session: session })
+  }
+
+  static standard(message: string, ...meta: any[]) {
+    log.info(message, ...meta)
+  }
+
+}
+
+export default Logger
