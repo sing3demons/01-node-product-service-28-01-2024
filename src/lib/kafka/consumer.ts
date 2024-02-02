@@ -1,20 +1,18 @@
-import { EachMessagePayload } from "kafkajs"
+import { EachMessagePayload } from 'kafkajs'
+import Logger from '../logger/logger.js'
 
-export async function consumeEventMessage({
+export async function consumeEventMessage({ topic, message, partition }: EachMessagePayload) {
+  Logger.debug('kafka consumer', {
     topic,
-    message,
-    partition
-  }: EachMessagePayload) {
-    console.log('=====================================>')
-    console.log('Topic: ', topic)
-    console.log('Partition: ', partition)
-    console.log('Message: ', message?.value?.toString())
+    partition,
+    message: message?.value?.toString()
+  })
 
-    switch (topic) {
-        case 'test':
-            // do something
-            break
-        default:
-            break
-    }
+  switch (topic) {
+    case 'test':
+      // do something
+      break
+    default:
+      break
   }
+}

@@ -75,7 +75,7 @@ class Logger {
     log.info(message, { action, session: session })
   }
 
-  static error(message: string, data?: {} | [], session?: string) {
+  static error(message: string, data?: any, session?: string) {
     const action = makeStructuredClone(data)
     log.error(message, { action, session: session })
   }

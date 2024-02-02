@@ -16,7 +16,6 @@
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "strictNullChecks": true,
-    "moduleResolution": "NodeNext",
-
+    "moduleResolution": "NodeNext"
   }
 }

@@ -1,5 +1,6 @@
 import KafkaNode from '../lib/kafka/kafka.js'
 import { Request, Response } from 'express'
+import Logger from '../lib/logger/logger.js'
 
 class TopicController {
   private topicService: KafkaNode
@@ -9,11 +10,18 @@ class TopicController {
   }
 
   async getTopics(req: Request, res: Response) {
+    const sessionId: string = req.headers['x-request-id']!.toString()
     try {
-      const topics = await this.topicService.listTopics()
+      const kafka = new KafkaNode()
+      const topics = await kafka.listTopics(sessionId)
+      if (topics === undefined) {
+        throw new Error('topics is undefined')
+      }
+      Logger.info('getTopics', { topics }, sessionId)
       res.json(topics)
     } catch (error) {
       if (error instanceof Error) {
+        Logger.error('error::getTopic', error?.message, sessionId)
         res.status(500).json({ message: error.message })
       }
     }
@@ -21,7 +29,8 @@ class TopicController {
 
   async createTopics(req: Request, res: Response) {
     try {
-      const createTopic = await this.topicService.createTopics(req.body.topic)
+      const kafka = new KafkaNode()
+      const createTopic = await kafka.createTopics(req.body.topic)
       res.json({ message: createTopic ? 'success' : 'failed', topic: req.body.topic })
     } catch (error) {
       if (error instanceof Error) {
