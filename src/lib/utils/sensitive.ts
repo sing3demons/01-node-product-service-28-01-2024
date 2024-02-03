@@ -1,6 +1,3 @@
-// export {
-//     maskNumber: (mobileNo: string):string => `${mobileNo.substring(0, 3)}-xxx-${mobileNo.substring(7, 11)}`
-
 import ignoreCase from './ignore.js'
 
 // }
@@ -12,14 +9,24 @@ interface Sensitive {
 }
 
 const sensitive: Sensitive = {
-  maskNumber: (mobileNo: string): string => {
-    if (mobileNo.length >= 10) {
-      return `${mobileNo.substring(0, 3)}-xxx-${mobileNo.substring(7, 11)}`
+  maskNumber: (mobileNo: string, mask?: string): string => {
+    let maskData = 'XXX-XXX-XX'
+    if (mask) {
+      maskData = maskData.replace(new RegExp('X', 'g'), mask)
     }
+    if (ignoreCase.startWith(mobileNo, '+')) {
+      if (mobileNo.length >= 10) {
+        return `${maskData}${mobileNo.substring(mobileNo.length - 2, mobileNo.length)}`
+      }
+    } else if (ignoreCase.startWith(mobileNo, '0')) {
+      if (mobileNo.length >= 10) {
+        return `${maskData}${mobileNo.substring(mobileNo.length - 2, mobileNo.length)}`
+      }
+    }
+
     return mobileNo
   },
   maskEmail: (email: string): string => {
-    // email
     const rex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/)
     if (!rex.test(email)) {
       return email
@@ -38,6 +45,7 @@ const sensitive: Sensitive = {
   maskPassword: (password: string): string => password.replace(password, '********'),
   masking: (item: any) => {
     for (const key in item) {
+      console.log('============> key', key)
       if (ignoreCase.equal(key, 'password')) {
         item[key] = sensitive.maskPassword(item[key])
       } else if (ignoreCase.equal(key, 'email')) {
