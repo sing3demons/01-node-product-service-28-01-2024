@@ -45,7 +45,6 @@ const sensitive: ISensitive = {
   maskPassword: (password: string): string => password.replace(password, '********'),
   masking: (item: any) => {
     for (const key in item) {
-      console.log('============> key', key)
       if (ignoreCase.equal(key, 'password')) {
         item[key] = sensitive.maskPassword(item[key])
       } else if (ignoreCase.equal(key, 'email')) {

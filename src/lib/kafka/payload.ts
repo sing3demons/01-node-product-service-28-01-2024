@@ -20,4 +20,9 @@ class Payload {
   }
 }
 
+export interface IPayload {
+  header: Record<string, unknown>
+  body: Record<string, unknown>
+}
+
 export default Payload

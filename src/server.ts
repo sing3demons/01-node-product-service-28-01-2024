@@ -22,6 +22,7 @@ class Server {
     app.get('/topics', topicController.getTopics)
     app.post('/topics', topicController.createTopics)
     app.delete('/topics/:topic', topicController.deleteTopics)
+    app.post('/topics/:topic/messages', topicController.sendMessages)
 
     app.get('/healthz', (req: Request, res: Response) => {
       const requestId = req.headers['x-request-id']

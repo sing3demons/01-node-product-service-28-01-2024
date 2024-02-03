@@ -17,7 +17,7 @@ export default class KafkaNode {
     }
 
     this.kafka = new Kafka({
-      logLevel: logLevel.INFO,
+      logLevel: logLevel.ERROR,
       clientId,
       brokers,
       requestTimeout: 25000,
@@ -38,55 +38,6 @@ export default class KafkaNode {
       }
       const { kafka } = new KafkaNode()
       kafka.logger().info('Connecting... ')
-      const admin = kafka.admin()
-      await admin.connect()
-
-      const listTopics = await admin.listTopics()
-
-      if (listTopics.length) {
-        const noExits = topics.filter(topic => !listTopics.includes(topic))
-        if (noExits.length > 0) {
-          for (const topic of noExits) {
-            const createTopic = await admin.createTopics({
-              topics: [
-                {
-                  topic,
-                  numPartitions: 3, // Number of partitions
-                  replicationFactor: 1 // Replication factor
-                }
-              ]
-            })
-            kafka.logger().info(`NEW : Topic ${topic} created with result ${createTopic}`)
-          }
-        }
-      } else {
-        for (const topic of topics) {
-          const createTopic = await admin.createTopics({
-            topics: [
-              {
-                topic,
-                numPartitions: 3, // Number of partitions
-                replicationFactor: 1 // Replication factor
-              }
-            ]
-          })
-          kafka.logger().info(`Topic ${topic} created with result ${createTopic}`)
-        }
-      }
-
-      if (topics.length > 0) {
-        const noExits = listTopics.filter(topic => !topics.includes(topic))
-        if (noExits.length > 0) {
-          for (const topic of noExits) {
-            await admin.deleteTopics({
-              topics: [topic]
-            })
-            kafka.logger().info(`DELETE : Topic ${topic} deleted with result ${topic}`)
-          }
-        }
-      }
-
-      await admin.disconnect()
 
       const groupId = process.env.KAFKA_GROUP_ID
       if (!groupId) {
@@ -115,6 +66,7 @@ export default class KafkaNode {
       })
       kafka.logger().info(`Send Successfully ${JSON.stringify(result)}`)
       await producer.disconnect()
+      return result
     } catch (error) {
       throw error
     }
@@ -124,14 +76,14 @@ export default class KafkaNode {
     try {
       const admin = this.kafka.admin()
       await admin.connect()
-      const topics = await admin.listTopics()
-      const groups = await admin.listGroups()
+
+      const [topics, { groups }] = await Promise.all([admin.listTopics(), admin.listGroups()])
       await admin.disconnect()
       Logger.info(
         'listTopics',
         {
           topics,
-          groups: admin.listGroups()
+          groups
         },
         session
       )

@@ -50,6 +50,24 @@ class TopicController {
       }
     }
   }
+
+  async sendMessages(req: Request, res: Response) {
+    const sessionId = getRequestId(req)
+    try {
+      const topic = req.params.topic
+      const headers = req.headers
+      const body = req.body
+      const result = await KafkaNode.sendMsg(topic, headers, body)
+
+      Logger.info('sendMessages', { result, topic, headers, body }, sessionId)
+
+      res.json({ message: result ? 'success' : 'failed' })
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(500).json({ message: error.message })
+      }
+    }
+  }
 }
 
 export default TopicController
