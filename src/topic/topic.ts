@@ -1,6 +1,7 @@
 import KafkaNode from '../lib/kafka/kafka.js'
 import { Request, Response } from 'express'
 import Logger from '../lib/logger/logger.js'
+import { getRequestId } from '../middleware/index.js'
 
 class TopicController {
   private topicService: KafkaNode
@@ -10,7 +11,7 @@ class TopicController {
   }
 
   async getTopics(req: Request, res: Response) {
-    const sessionId: string = req.headers['x-request-id']!.toString()
+    const sessionId = getRequestId(req)
     try {
       const kafka = new KafkaNode()
       const topics = await kafka.listTopics(sessionId)
@@ -20,8 +21,8 @@ class TopicController {
       Logger.info('getTopics', { topics }, sessionId)
       res.json(topics)
     } catch (error) {
+      Logger.error('error::getTopic', error, sessionId)
       if (error instanceof Error) {
-        Logger.error('error::getTopic', error?.message, sessionId)
         res.status(500).json({ message: error.message })
       }
     }

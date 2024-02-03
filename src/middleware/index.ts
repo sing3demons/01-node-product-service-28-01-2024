@@ -8,4 +8,9 @@ function setRequestID() {
   }
 }
 
-export { setRequestID }
+function getRequestId(req: Request) {
+  const requestId = (req.headers['x-request-id'] as string) || uuidv4()
+  return requestId
+}
+
+export { setRequestID, getRequestId }
