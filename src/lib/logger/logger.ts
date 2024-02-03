@@ -1,7 +1,7 @@
 import { Logger as WinstonLog, createLogger, format, transports } from 'winston'
-import sensitive from '../utils/sensitive.js'
 import ignoreCase from '../utils/ignore.js'
 import { makeStructuredClone } from '../utils/index.js'
+import Sensitive from '../utils/sensitive.js'
 
 let level = process.env.LOG_LEVEL ?? 'debug'
 if (process.env.NODE_ENV === 'production') {
@@ -9,6 +9,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 function NewLogger(serviceName: string): WinstonLog {
+  const sensitive = new Sensitive()
   return createLogger({
     level: level,
     format: format.combine(
@@ -88,7 +89,6 @@ class Logger {
   static standard(message: string, ...meta: any[]) {
     log.info(message, ...meta)
   }
-
 }
 
 export default Logger

@@ -1,14 +1,14 @@
 import ignoreCase from './ignore.js'
 
 // }
-interface Sensitive {
-  maskNumber(mobileNo: string): string
+interface ISensitive {
+  maskNumber(mobileNo: string, mask?: string): string
   maskEmail(email: string): string
   maskPassword(password: string): string
   masking(item: any): void
 }
 
-const sensitive: Sensitive = {
+const sensitive: ISensitive = {
   maskNumber: (mobileNo: string, mask?: string): string => {
     let maskData = 'XXX-XXX-XX'
     if (mask) {
@@ -61,4 +61,18 @@ const sensitive: Sensitive = {
   }
 }
 
-export default sensitive
+class Sensitive implements ISensitive {
+  maskNumber(mobileNo: string, mask?: string): string {
+    return sensitive.maskNumber(mobileNo, mask)
+  }
+  maskEmail(email: string): string {
+    return sensitive.maskEmail(email)
+  }
+  maskPassword(password: string): string {
+    return sensitive.maskPassword(password)
+  }
+  masking(item: any): void {
+    sensitive.masking(item)
+  }
+}
+export default Sensitive

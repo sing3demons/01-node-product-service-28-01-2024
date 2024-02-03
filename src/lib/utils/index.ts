@@ -1,6 +1,7 @@
-import sensitive from './sensitive.js'
+import Sensitive from './sensitive.js'
 
 function makeStructuredClone<T>(obj: T): T {
+  const sensitive = new Sensitive()
   if (typeof obj === 'undefined') {
     return obj
   }
